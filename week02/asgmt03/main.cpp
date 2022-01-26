@@ -19,26 +19,40 @@ Uses: The class Life and its methods initialize(), print(), and update().
       do{
             std::cout << "Give dimension of the grid wanted: \nRows:";
             std::cin >> maxrow;
-            std::cout << "\nColumns: ";
+            std::cout << "Columns: ";
             std::cin >> maxcol;
-            if(!(0<maxcol<MAXCOL) || !(0<maxcol<MAXCOL)){
-                  std::cout << "Rows should be in between 0 and" << MAXROW;
-                  std::cout << "Please give valid dimensions\n";
+            if(!(0<=maxcol<MAXCOL) || !(0<=maxcol<MAXCOL) || std::cin.fail()){
+
+                  std::cout << "\n\n****************************************\n";
+                  std::cout << "Rows should be in between 0 and " << MAXROW;
                   std::cout << "\nColumns should be in between 0 and " << MAXCOL;
+                  std::cout << "\nPlease give valid dimensions\n";
+                  std::cout << "****************************************\n\n";
+                  erase_cin(MAXROW);
             }
       }while((maxcol > MAXCOL || maxcol <= 0) || (0 > maxrow > MAXROW || maxrow <= 0));
 
+      erase_cin(maxcol);
       int **arr = allocate_array(maxrow, maxcol);
 
       configuration.initialize(arr, maxrow, maxcol);
 
-      configuration.print(maxrow, maxcol);
+      configuration.print();
       std::cout << "Continue viewing new generations? " << std::endl;
       while (user_says_yes()) {
-      configuration.update(maxrow, maxcol);
-      configuration.print(maxrow, maxcol);
+      configuration.update();
+      configuration.print();
       std::cout << "Continue viewing new generations? " << std::endl;
    }
+      std::cout << "Do you want to save state?\n";
+      
+      if(user_says_yes()){
+            std::string fname;
+            std::cout << "please give file name: ";
+            std::cin >> fname;
+            configuration.save_to_file(fname);
+      }
       delete_array(arr);
+
    
 }

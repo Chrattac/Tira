@@ -9,5 +9,5 @@ public:
    void update(const int&, const int&);
 private:
    int **grid;
-   int neighbor_count(const int& row, const int& col, const int& maxrow, const int& maxcol);
+   int neighbor_count(int& row, int& col, const int& maxrow, const int& maxcol);
 };

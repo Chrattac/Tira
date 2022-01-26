@@ -8,32 +8,50 @@ void Life::initialize(int** arr, const int& maxrow, const int& maxcol)
 Pre:  None.
 Post: The Life object contains a configuration specified by the user.
 */
-
 {   
    grid = arr;
 
-   int row, col;
+   bool cntn = true;
+   std::string line;
+   int row, col, colMax=0;
    for (row = 0; row < maxrow; row++)
       for (col = 0; col < maxcol; col++){
          grid[row][col] = 0;
-}
-   std::cout << "List the coordinates for living cells." << std::endl;
-   std::cout << "Terminate the list with the special pair -1 -1" << std::endl;
-   std::cout << "Give row: ";
-   std::cin >> row >> col;
+   }
 
-   while (row != -1 || col != -1) {
-      if (row >= 1 && row <= maxrow)
-         if (col >= 1 && col <= maxcol)
-            grid[row-1][col-1] = 1;
-         else
-            std::cout << "Column " << col << " is out of range." << std::endl;
-      else
-         std::cout << "Row " << row << " is out of range." << std::endl;
-      std::cin >> row >> col;
+   row = 0;
+   col = 0;
+   std::cout << "Write the rows below and press enter after each line" << std::endl;
+   std::cout << "x for living cell, space for dead cell\n";
+   std::cout << "Terminate the inputting with typing $" << std::endl;
+   std::cout << "Type row:\n";
+
+   while(cntn){
+      std::cout << "row#:" << row+1;
+      getline(std::cin, line, '\n');
+
+      colMax = line.length();
+
+      if(line.length() >= maxrow){
+         std::cout << "Given line was longer than expected,\nusing only first " << maxcol << " characters\n";
+         colMax = maxcol;
+      }
+
+      for(col = 0; col<colMax; col++){
+         if (line[col] == 'x'){
+            grid[row][col] = 1;
+         }
+         else if(line[col]=='$'){
+            cntn=false;
+         }
+      }
+
+      row++;
+
+      if (row == maxrow)
+         cntn=false;
    }
 }
-
 
 void Life::print(const int& maxrow, const int& maxcol) const
 /*
@@ -42,10 +60,9 @@ Post: The configuration is written for the user.
 */
 
 {
-   int row = 0, col = 0;
+   int row, col;
    std::cout << "\nThe current Life configuration is:" <<std::endl;
    for (row = 0; row < maxrow; row++) {
-      std::cout << row+1;
       for (col = 0; col < maxcol; col++)
          if (grid[row][col] == 1) std::cout << '@';
          else std::cout << ' ';
@@ -72,15 +89,13 @@ void Life::update(const int& maxrow, const int& maxcol){
                     new_grid[row][col] = 0;                //  Cell is now dead.
             }
 
-    for (row = 0; row < maxrow; row++){
-        for (col = 0; col < maxcol; col++){
+    for (row = 0; row < maxrow; row++)
+        for (col = 0; col < maxcol; col++)
             grid[row][col] = new_grid[row][col];
-        }
-    }
    delete_array(new_grid);
 }
 
-int Life::neighbor_count(const int& row, const int& col, const int& maxrow, const int& maxcol)
+int Life::neighbor_count(int& row, int& col, const int& maxrow, const int& maxcol)
 /*
 Pre:  The Life object contains a configuration, and the coordinates
       row and col define a cell inside its hedge.
@@ -106,7 +121,6 @@ Post: The number of living neighbors of the specified cell is returned.
    int count = 0;
 
    for (i; i<=imax; i++){
-
       if(col == 0){
       j=col;
       jmax=col+1;

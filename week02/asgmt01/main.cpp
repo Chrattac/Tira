@@ -21,13 +21,15 @@ Uses: The class Life and its methods initialize(), print(), and update().
             std::cin >> maxrow;
             std::cout << "\nColumns: ";
             std::cin >> maxcol;
-            if(!(0<maxcol<MAXCOL) || !(0<maxcol<MAXCOL)){
+            if(!(0<=maxcol<MAXCOL) || !(0<=maxcol<MAXCOL)){
                   std::cout << "Rows should be in between 0 and" << MAXROW;
                   std::cout << "Please give valid dimensions\n";
                   std::cout << "\nColumns should be in between 0 and " << MAXCOL;
             }
       }while((maxcol > MAXCOL || maxcol <= 0) || (0 > maxrow > MAXROW || maxrow <= 0));
 
+      std::cin.clear();
+      std::cin.ignore(maxcol, '\n');
       int **arr = allocate_array(maxrow, maxcol);
 
       configuration.initialize(arr, maxrow, maxcol);
