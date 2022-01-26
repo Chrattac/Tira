@@ -11,11 +11,13 @@ Uses: The class Life and its methods initialize(), print(), and update().
 */
 
 {
-
-
+      bool automate, again=true;
+      double delay = 0;
       Life configuration;
       instructions();
-      int maxrow = 0, maxcol = 0;
+      int maxrow = 0, maxcol = 0, millis=1000 , i=0; 
+      double seconds = 1;
+      uint8_t iterations;
       do{
             std::cout << "Give dimension of the grid wanted: \nRows:";
             std::cin >> maxrow;
@@ -32,18 +34,69 @@ Uses: The class Life and its methods initialize(), print(), and update().
             }
       }while((maxcol > MAXCOL || maxcol <= 0) || (0 > maxrow > MAXROW || maxrow <= 0));
 
-      erase_cin(maxcol);
       int **arr = allocate_array(maxrow, maxcol);
+
+      std::cout << "Do you want to automate the progress?";
+      automate = user_says_yes();
+      if(automate){
+            std::cout << "Please give update interval in seconds (0.5 - 5)";
+            std::cin >> seconds;
+            while(std::cin.fail() || !(1 <= seconds <= 5)){
+                  std::cout << "Please give valid value (0.5 - 5): ";
+                  std::cin >> seconds;
+            }
+            
+            std::cout << "How many iterations do you want to automate? (max. 255): ";
+            std::cin >> iterations;
+            while(std::cin.fail()){
+                  std::cout << "Please give valid amount (0 - 255): ";
+                  std::cin >> seconds;
+            }
+
+            millis = (int)nearbyint(1000*seconds);
+      }
+      erase_cin(maxcol);
 
       configuration.initialize(arr, maxrow, maxcol);
 
       configuration.print();
-      std::cout << "Continue viewing new generations? " << std::endl;
-      while (user_says_yes()) {
+      switch(automate){
+            case 0:
+            std::cout << "Continue viewing new generations? " << std::endl;
+            again = user_says_yes();
+            break;
+            case 1:
+            #ifdef _win32
+            sleep(millis);
+            #endif
+            #ifdef linux
+            usleep(millis*1000);
+            #endif
+            i++;
+            break;
+      }
+      while (again || (i<=iterations)) {
       configuration.update();
       configuration.print();
-      std::cout << "Continue viewing new generations? " << std::endl;
-   }
+      
+            switch(automate){
+                  case 0: 
+                  std::cout << "Continue viewing new generations? " << std::endl;
+                  again = user_says_yes();
+                  break;
+                  case 1:
+                  #ifdef _win32
+                  sleep(millis);
+                  #endif
+                  #ifdef linux
+                  usleep(millis*1000);
+                  #endif
+                  i++;
+                  break;
+            }
+            
+            if(i == iterations) automate=false;
+      }
       std::cout << "Do you want to save state?\n";
       
       if(user_says_yes()){

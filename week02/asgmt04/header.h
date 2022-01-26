@@ -1,5 +1,14 @@
 #pragma once
 
+#ifdef _WIN32
+#include <dos.h>
+#endif
+
+#ifdef linux
+#include <unistd.h>
+#endif
+
+#include <math.h>
 #include <vector>
 
 #include "../../utility.h"
