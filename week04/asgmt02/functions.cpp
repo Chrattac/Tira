@@ -41,3 +41,74 @@ Error_code copy_stack_C(Stack& x, Stack& y){
     return success;
 
 }
+
+// ASGMT 02:
+bool full(Stack& x){
+
+    return x.full();
+}
+
+Error_code pop_top(Stack& x, Stack_entry& y){
+    if(x.size() == 0){
+        return underflow;
+    }
+    else{
+        x.top(y);
+        return success;
+    }
+}
+
+void clear(Stack& x){
+    x.empty();
+}
+
+int size(Stack& x){
+    return x.size();
+}
+
+void delete_all(Stack& x, Stack_entry& y){
+    Stack temp;
+    Stack_entry d;
+    
+    for (int i = 0; i<maxstack;i++){
+        if(!x.empty()){
+            x.top(d);
+            x.pop();
+            if(d != y){
+                temp.push(d);
+            }
+        }else {break;}
+    }
+
+    for(int i = 0; i<maxstack;i++){
+        if(!temp.empty()){
+            temp.top(d);
+            temp.pop();
+            x.push(d);
+        }else{break;}
+    }
+
+}
+
+void printStack(Stack& s){
+    int tempInt;
+    Stack tempStack;
+
+    copy_stack_A(s, tempStack);
+
+    std::cout << "Stackin sisältö: \n";
+    for(int i=0; i<maxstack;i++){
+        s.top(tempInt);
+        s.pop();
+        std::cout << tempInt;
+        if(!s.empty()){
+            std::cout << ", ";
+        }else{
+            std::cout << "\n";
+            break;
+        }
+    }
+
+    copy_stack_A(tempStack, s);
+
+}
