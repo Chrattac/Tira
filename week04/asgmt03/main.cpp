@@ -2,28 +2,19 @@
 
 int main(){
 
+    cntn;
     Stack s;
     Stack_entry a = 2;
-    int i = 0;
 
-    for(i=0; i<maxstack; i++){
-        s.push(i%3);
-    }
-
-    if(full(s)){
-        std::cout << "Stack on täynnä\n";
-
-    }else{
-        std::cout << "Stack ei ole täynnä\n";
-    }
-
-    printStack(s);
-
-    std::cout << "Poistetaan luku 2\n";
-
-    delete_all(s, a);
-
-    printStack(s);
-    return 0;
+    
+    std::cout << "Please give a integer: ";
+    do{
+        std::cin >> number;
+        if(std::cin.fail()){
+            std::cout << "Please give valid integer: ";
+            cntn=false;
+        }else{cntn=true;}
+        
+    }while(!cntn);
 
 }
