@@ -2,7 +2,7 @@
 
 #include "header.h"
 
-const int maxstack = 10;
+const int maxstack = 100;
 
 typedef int Stack_entry;
 

@@ -96,7 +96,6 @@ void printStack(Stack& s){
 
     copy_stack_A(s, tempStack);
 
-    std::cout << "Stackin sisältö: \n";
     for(int i=0; i<maxstack;i++){
         pop_top(s, tempInt);
         std::cout << tempInt;
@@ -110,4 +109,23 @@ void printStack(Stack& s){
 
     copy_stack_A(tempStack, s);
 
+}
+
+bool isPrime(int& x){
+    bool prime;
+    if(x == 2){
+        prime = true;
+    }
+    else{
+        for (int i = 2; i<(x/2); i++){
+            if(x%i==0){
+                prime = false;
+                break;
+            }else{prime == true;}
+        }
+    }
+
+
+
+    return prime;
 }

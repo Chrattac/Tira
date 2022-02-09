@@ -13,3 +13,4 @@ int size(Stack&);
 void delete_all(Stack&, Stack_entry&);
 
 void printStack(Stack&);
+bool isPrime(int&);
