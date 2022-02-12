@@ -93,10 +93,13 @@ int Stack::size() const{
 }
 
 void Stack::print() const{
-   std::cout << "Stack contains following elements:\n";
-   for(int i = 0; i<count; i++){
-      std::cout << entry[i];
-      if(i<count-1) std::cout << ", ";
+   if(empty()) std::cout << "Stack is empty"; 
+   else{
+      std::cout << "Stack contains following elements:\n";
+      for(int i = 0; i<count; i++){
+         std::cout << entry[i];
+         if(i<count-1) std::cout << ", ";
+      }
    }
    std::cout << "\n";
 }

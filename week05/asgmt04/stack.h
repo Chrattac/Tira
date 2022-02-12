@@ -3,7 +3,7 @@
 #include "header.h"
 
 typedef int Stack_entry;
-const int maxstack = 100;
+const int maxstack = 11;
 
 class Stack {
 public:

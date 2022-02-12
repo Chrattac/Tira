@@ -12,8 +12,29 @@ Post: A help screen for the program is printed, giving the meaning of each
 */
 
 {
-std::cout << "Which part do you want to check?\n"
-      << "A, B, C, D, E, F or [Q]uit?: ";
+    std::cout << std::endl
+         << "This program allows the user to enter one command" << std::endl
+         << "(but only one) on each input line." << std::endl
+         << "For example, if the command S is entered, then" << std::endl
+         << "the program will serve the front of the queue." << std::endl
+         << std::endl
+
+         << " The valid commands are:" << std::endl
+         << "A - Append the next input character to the extended queue" << std::endl
+         << "S - Serve the front of the extended queue" << std::endl
+         << "R - Retrieve and print the front entry." << std::endl
+         << "# - The current size of the extended queue" << std::endl
+         << "C - Clear the extended queue (same as delete)" << std::endl
+         << "P - Print the extended queue" << std::endl
+         << "H - This help screen" << std::endl
+         << "Q - Quit" << std::endl
+
+         << "Press <Enter> to continue." << std::flush;
+
+    char c;
+    do {
+       std::cin.get(c);
+    } while (c != '\n');
 }
 
 
@@ -75,8 +96,8 @@ char get_command()
     while (waiting) {
        std::cin >> command;
        command = tolower(command);
-       if (command == 'a' || command == 's' || command == 'r' ||
-           command == '#' || command == 'c' || command == 'p' ||
+       if (command == 'a' || command == 'b' || command == 'c' ||
+           command == 'd' || command == 'e' || command == 'f' ||
            command == 'h' || command == 'q' ) waiting = false;
 
 
@@ -173,10 +194,13 @@ Error_code rev_queue(Extended_queue& q){
     else{
         while(!q.empty()){
             q.retrieve_and_serve(temp);
+            std::cout << "temp: " << temp << '\n';
             temp_S.push(temp);
         }
+        std::cout << "\nToinen looppi\n";
         while(!temp_S.empty()){
             temp_S.pop_top(temp);
+            std::cout << "temp: " << temp << '\n';
             q.append(temp);
         }
     }

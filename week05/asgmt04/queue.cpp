@@ -49,7 +49,7 @@ is empty return an Error_code of underflow.
 }
 
 
-Error_code Queue::retrieve(Queue_entry &item) const
+Error_code Queue::retrieve(Queue_entry &item)
 /*
 Post: The front of the Queue retrieved to the output
       parameter item. If the Queue is empty return an Error_code of underflow.

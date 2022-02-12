@@ -17,12 +17,26 @@ void Extended_queue::clear(){
 }
 
 void Extended_queue::print() const{
+
+    int i = front, imax;
+    bool overlap = false;
+    if(front < rear) imax = rear;
+    else if(rear < front) imax = maxqueue-1, overlap = true;
+
+
     if(empty()) std::cout << "Queue is empty.";
     else{
         std::cout << "Queue consists of following items:\n";
-        for(int i = 0; i<count; i++){
+        for(i; i<=imax; i++){
             std::cout << entry[i];
-            if(i < count-1) std::cout << ", ";
+            if(i < imax) std::cout << ", ";
+            if(overlap && i == imax){
+                std::cout << ", ";
+                for(int j = 0; j<=rear; j++){
+                    std::cout << entry[j];
+                    if(j<rear) std::cout << ", ";
+                } 
+            }
         }
     }
     std::cout << "\n";

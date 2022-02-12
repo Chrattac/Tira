@@ -96,8 +96,8 @@ char get_command()
     while (waiting) {
        std::cin >> command;
        command = tolower(command);
-       if (command == 'a' || command == 'b' || command == 'c' ||
-           command == 'd' || command == 'e' || command == 'f' ||
+       if (command == 'a' || command == 's' || command == 'r' ||
+           command == '#' || command == 'c' || command == 'p' ||
            command == 'h' || command == 'q' ) waiting = false;
 
 
