@@ -194,13 +194,10 @@ Error_code rev_queue(Extended_queue& q){
     else{
         while(!q.empty()){
             q.retrieve_and_serve(temp);
-            std::cout << "temp: " << temp << '\n';
             temp_S.push(temp);
         }
-        std::cout << "\nToinen looppi\n";
         while(!temp_S.empty()){
             temp_S.pop_top(temp);
-            std::cout << "temp: " << temp << '\n';
             q.append(temp);
         }
     }
