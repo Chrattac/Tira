@@ -3,7 +3,7 @@
 int main(){
     std::string s;
 
-    std::cout << "Testiohjelma: ";
+    std::cout << "Test program for excercise 3: ";
     getline(std::cin, s, '\n');
 
     std::cout << "Input\t\t\tOutput\n";
