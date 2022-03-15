@@ -70,7 +70,7 @@ int getInteger(){
         }
         else check = true;
     
-    }while(!check || integer < 1);
+    }while(!check);
 
     return integer;
 }
