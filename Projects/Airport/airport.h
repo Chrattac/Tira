@@ -10,6 +10,9 @@ public:
     virtual Error_code can_depart(const Plane &current);
     virtual Runway_activity activity(int time, Plane &moving);
 
+    Runway_activity land_plane(int time, Plane &current);
+    Runway_activity depart_plane(int time, Plane &current);
+
     int get_landings_requests() const;
     int get_landings() const;
     int get_landing_accepted() const;
@@ -71,10 +74,11 @@ protected:
 
 private:
     Runway_purpose purpose;       //  purpose of the runway
-    bool in_use;
-    int idle_check_time;          // to avoid duplicated idle_time -counting
+    bool in_use = false;          // set usage status as false when created
     bool landing_priority = false; // priorities, default is false;
     bool takeoff_priority = false; 
+
+    int idle_check_time;          // to avoid duplicated idle_time -counting
 
 };
 
@@ -86,7 +90,7 @@ class Airport : public Runway{
 
     Error_code can_land (const Plane&current);
     Error_code can_depart (const Plane &current);
-    Error_code temporary_runway_use(Runway *runway);
+    Error_code temporary_runway_use(Runway *runway, const bool priorityfull);
 
     void reset_runways();
     void activity(int time, Plane &moving, bool& landing, bool& takeoff, bool& idle);

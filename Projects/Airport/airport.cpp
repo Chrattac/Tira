@@ -4,7 +4,7 @@ Airport::Airport(int limit, uint8_t runway_count) : Runway()
 {   // Constructor asking for purpose of runaways
     queue_limit = limit;
 
-    char choice;
+    char choice = ' ';
     //Initialize each runway separately
     for(uint8_t i = 0; i<runway_count; i++){
         if(choice != 'b'){
@@ -98,8 +98,9 @@ Uses:  Queue.
         }
     }
 
-    //if landing priority is set:
-    if( get_landing_priority() ){
+    //if landing priority is set also check departures, separate loop to avoid
+    //arrivals to fill departures in case it comes 1st
+    if( get_landing_priority() && result != success){
         for ( Runway *r : runways ){
             if(r->get_purpose() == departures) result = r->can_land(current);
             if ( result == success ) break;
@@ -133,7 +134,7 @@ Uses:  class Queue.
     }
     
     //if takeoff priority is set:
-    if( get_takeoff_priority() ){
+    if( get_takeoff_priority()  && result != success ){
         for ( Runway *r : runways ){
             if(r->get_purpose() == arrivals) result = r->can_depart(current);
             if ( result == success ) break;
@@ -150,106 +151,118 @@ Uses:  class Queue.
 }
 
 
-Error_code Airport::temporary_runway_use(Runway *runway){
+Error_code Airport::temporary_runway_use(Runway *runway, const bool priorityfull){
     Error_code error = success;
+
     bool done = false,
     arrivals_flag = false,
     takeoff_flag = false;
 
-    //First check if there is anything on queues for other runways
-    for( Runway *r : runways ){
-        if(r != runway){
-            if(!r->get_landing_empty()) arrivals_flag = true;
-            if(!r->get_takeoff_empty()) takeoff_flag = true;
+    //First check if check already done and then wheter there is anything on queues for other runways
+    //Second expression is for priority to check wheter there is priority runway full
+    //Since we come here also if there is either priority set even if runway wasn't about to go idle
+    if( priorityfull && get_landing_priority() ) arrivals_flag = true;
+    else if (priorityfull && get_takeoff_priority() ) takeoff_flag = true;
+    else{
+        for( Runway *r : runways ){
+            if(r != runway){
+                if( !arrivals_flag && !r->get_landing_empty() ) 
+                    arrivals_flag = true;
+                if( !takeoff_flag && !r->get_takeoff_empty() )
+                    takeoff_flag = true;
+            }
+            //No need to check further runways;
+            if(arrivals_flag && takeoff_flag) break;
         }
-        //No need to check further runways;
-        if(arrivals_flag && takeoff_flag) break;
     }
 
-    //If transfer runway's queue is full, set flag back to false
-    if(runway->get_landing_size() >= queue_limit) arrivals_flag = false;
-    if(runway->get_takeoff_size() >= queue_limit) takeoff_flag = false;
+    //If transfer runway's queue is full (ie. flag set due to itself previously), 
+    //set flag back to false
+    if(runway->get_landing_full()) arrivals_flag = false;
+    if(runway->get_takeoff_full()) takeoff_flag = false;
 
-    //If there is anything in other runway queues proceed with following
+    //If flags have been set, proceed to transfer plane
     if(arrivals_flag || takeoff_flag){
         Plane transfer;
         for ( Runway *r : runways ){
-            switch ( runway->get_purpose() ){
-                case arrivals_strict: //only take arrivals
-                    if( arrivals_flag ){
-                        if(!r->get_landing_empty()){
-                            error = r->remove_landing(transfer);
-                            if( error == success ) runway->add_landing(transfer);
-                            if( error == success ) done = true;
+            if(r != runway){
+                switch ( runway->get_purpose() ){
+                    case arrivals_strict: //only take arrivals
+                        if( arrivals_flag ){
+                            if(!r->get_landing_empty()){
+                                error = r->remove_landing(transfer);
+                                if( error == success ) runway->add_landing(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case arrivals:        //prioritize arrivals
-                    if( arrivals_flag ){
-                        if(!r->get_landing_empty()){
-                            error = r->remove_landing(transfer);
-                            if( error == success ) runway->add_landing(transfer);
-                            if( error == success ) done = true;
+                    case arrivals:        //prioritize arrivals
+                        if( arrivals_flag ){
+                            if(!r->get_landing_empty()){
+                                error = r->remove_landing(transfer);
+                                if( error == success ) runway->add_landing(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
-                    else{
-                        if(!r->get_takeoff_empty()){
-                            error = r->remove_takeoff(transfer);
-                            if( error == success ) runway->add_takeoff(transfer);
-                            if( error == success ) done = true;
+                        else{
+                            if(!r->get_takeoff_empty()){
+                                error = r->remove_takeoff(transfer);
+                                if( error == success ) runway->add_takeoff(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case departures_strict: //only take takeoffs
-                    if( takeoff_flag ){
-                        if(!r->get_takeoff_empty()){
-                            error = r->remove_landing(transfer);
-                            if( error == success ) runway->add_takeoff(transfer);
-                            if( error == success ) done = true;
+                    case departures_strict: //only take takeoffs
+                        if( takeoff_flag ){
+                            if(!r->get_takeoff_empty()){
+                                error = r->remove_landing(transfer);
+                                if( error == success ) runway->add_takeoff(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case departures:        //prioritize takeoffs
-                    if( takeoff_flag ){
-                        if(!r->get_takeoff_empty()){
-                            error = r->remove_takeoff(transfer);
-                            if( error == success ) runway->add_takeoff(transfer);
-                            if( error == success ) done = true;
+                    case departures:        //prioritize takeoffs
+                        if( takeoff_flag ){
+                            if(!r->get_takeoff_empty()){
+                                error = r->remove_takeoff(transfer);
+                                if( error == success ) runway->add_takeoff(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
-                    else{
-                        if(!r->get_landing_empty()){
-                            error = r->remove_landing(transfer);
-                            if( error == success ) runway->add_landing(transfer);
-                            if( error == success ) done = true;
+                        else{
+                            if(!r->get_landing_empty()){
+                                error = r->remove_landing(transfer);
+                                if( error == success ) runway->add_landing(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
 
-                case any:               //prioritize arrivals, same as "arrivals"
-                    if( arrivals_flag ){
-                        if(!r->get_landing_empty()){
-                            error = r->remove_landing(transfer);
-                            if( error == success ) runway->add_landing(transfer);
-                            if( error == success ) done = true;
+                    case any:               //prioritize arrivals, same as "arrivals"
+                        if( arrivals_flag ){
+                            if(!r->get_landing_empty()){
+                                error = r->remove_landing(transfer);
+                                if( error == success ) runway->add_landing(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
-                    else{
-                        if(!r->get_takeoff_empty()){
-                            error = r->remove_takeoff(transfer);
-                            if( error == success ) runway->add_takeoff(transfer);
-                            if( error == success ) done = true;
+                        else{
+                            if(!r->get_takeoff_empty()){
+                                error = r->remove_takeoff(transfer);
+                                if( error == success ) runway->add_takeoff(transfer);
+                                if( error == success ) done = true;
+                            }
                         }
-                    }
 
-                    break;
+                        break;
+                }
             }
 
             if(done) break;             // break as soon as plane received
@@ -271,11 +284,24 @@ void Airport::activity(int time, Plane &moving, bool& landing, bool& takeoff, bo
     landing = false;
     takeoff = false;
     bool_idle = false;
+    
+    bool priority_full = false;
 
+        if(get_landing_priority())
+            for( Runway *r : runways ) if( r->get_landing_full() ) {
+                priority_full = true;
+                break;
+            }
+
+        if(get_takeoff_priority())
+            for( Runway *r : runways ) if( r->get_takeoff_full() ) {
+                 priority_full = true;
+                 break;
+            }
 
     for(Runway *r : runways){
-        if(r->queues_empty() || get_landing_priority() || get_takeoff_priority()) 
-            temporary_runway_use(r);
+        if(r->queues_empty() || priority_full) 
+            temporary_runway_use(r, priority_full);
 
         switch(r->activity(time, moving)){
             case land:
@@ -289,6 +315,9 @@ void Airport::activity(int time, Plane &moving, bool& landing, bool& takeoff, bo
                 break;
             case busy:
                 break;
+
+        // break from the for loop as soon as the plane is handled to avoid multiplication
+        if( landing || takeoff || bool_idle ) break;
         }
     }
 }

@@ -98,25 +98,21 @@ Uses:  class Queue.
 {
    Runway_activity in_progress;
 
+   // pre calculated boolean values for what happens to ease up else-if chain.
+   bool priority_landing = !landing.empty() * landing_priority;
+   bool priority_takeoff = !takeoff.empty() * takeoff_priority;
+   bool landing_main = !landing.empty() * (purpose == arrivals || purpose == arrivals_strict);
+   bool takeoff_main = !takeoff.empty() * (purpose == departures || purpose == departures_strict);
+   bool landing_secondary = !landing.empty();
+   bool takeoff_secondary = !takeoff.empty();
+
    if (in_use) in_progress = busy;
-   else if ( !landing.empty() && !( takeoff.empty() && takeoff_priority ) ) {
-      landing.retrieve(moving);
-      land_wait += time - moving.started();
-      num_landings++;
-      in_progress = land;
-      landing.serve();
-      in_use = true;
-   }
-
-   else if ( !takeoff.empty() && !( landing.empty() && landing_priority ) ) {
-      takeoff.retrieve(moving);
-      takeoff_wait += time - moving.started();
-      num_takeoffs++;
-      in_progress = take_off;
-      takeoff.serve();
-      in_use = true;
-   }
-
+   else if ( priority_landing ) in_progress = land_plane(time, moving);
+   else if ( priority_takeoff ) in_progress = depart_plane(time, moving);
+   else if ( landing_main ) in_progress = land_plane(time, moving);
+   else if ( takeoff_main ) in_progress = depart_plane(time, moving);
+   else if ( landing_secondary ) in_progress = land_plane(time, moving);
+   else if ( takeoff_secondary ) in_progress = depart_plane(time, moving);
    else {
       in_progress = idle;
       
@@ -128,6 +124,21 @@ Uses:  class Queue.
    return in_progress;
 }
 
+Runway_activity Runway::land_plane(int time, Plane &moving){
+      landing.retrieve_and_serve(moving);
+      land_wait += time - moving.started();
+      num_landings++;
+      in_use = true;
+      return land;
+}
+
+Runway_activity Runway::depart_plane(int time, Plane &moving){
+      takeoff.retrieve_and_serve(moving);
+      takeoff_wait += time - moving.started();
+      num_takeoffs++;
+      in_use = true;
+      return take_off;
+}
 
 
 int Runway::get_landings_requests() const { return num_land_requests; }
@@ -144,11 +155,11 @@ int Runway::get_takeoff_wait() const { return takeoff_wait; }
 
 int Runway::get_idle_time() const { return idle_time; }
 
-bool Runway::get_landing_full() const { return landing.full(); }
+bool Runway::get_landing_full() const { return ( landing.size() >= queue_limit ); }
 bool Runway::get_landing_empty() const { return landing.empty(); }
 int Runway::get_landing_size() const { return landing.size(); }
 
-bool Runway::get_takeoff_full() const { return takeoff.full(); }
+bool Runway::get_takeoff_full() const { return ( takeoff.size() >= queue_limit ); }
 bool Runway::get_takeoff_empty() const { return takeoff.empty(); }
 int Runway::get_takeoff_size() const { return takeoff.size(); }
 
@@ -158,7 +169,7 @@ bool Runway::get_takeoff_priority() const{ return takeoff_priority;}
 void Runway::set_landing_priority(bool priority){ landing_priority = priority; }
 void Runway::set_takeoff_priority(bool priority){ takeoff_priority = priority; }
 
-bool Runway::queues_empty() const {return ( takeoff.empty()+landing.empty() ); }
+bool Runway::queues_empty() const {return ( takeoff.empty() * landing.empty() ); }
 
 Error_code Runway::add_landing(const Plane &current) { return landing.append(current); }
 Error_code Runway::add_takeoff(const Plane &current) { return takeoff.append(current); }
