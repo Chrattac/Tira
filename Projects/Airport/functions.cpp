@@ -47,16 +47,16 @@ Uses: utility function user_says_yes
    } while (!acceptable);
 }
 
-void run_idle(int time)
+void run_idle(int time, int runway_number)
 /*
 Post: The specified time is printed with a message that the runway is idle.
 */
 {
-   std::cout << time << ": At least one runway is idle." << std::endl;
+   std::cout << time << ": Runway #" << runway_number << " is idle." << std::endl;
 }
 
 
-void simulate_several_runaways
+void start_simulation
 (int &end_time, int &queue_limit, 
 double &arrival_rate, double &departure_rate, int runway_count)
 {
@@ -79,7 +79,7 @@ double &arrival_rate, double &departure_rate, int runway_count)
            if (airport.can_depart(current_plane) != success)
               current_plane.refuse();
         }
-
+        int runway_number = 1;
         // Use as many planes as there are runways
         for(int k = 0; k < runway_count; k++) planes.append(Plane());
 
@@ -94,11 +94,10 @@ double &arrival_rate, double &departure_rate, int runway_count)
             
             if(land) moving_plane.land(current_time);
             else if(take_off) moving_plane.fly(current_time);
-            else if(bool_idle) run_idle(current_time);
-
-        }
+            else if(bool_idle) run_idle(current_time, runway_number++);
 
         airport.reset_runways();
+      }
     }
     airport.shut_down(end_time);
 }
