@@ -14,3 +14,19 @@ struct Node {
    Node();
    Node(Node_entry item, Node *add_on = NULL);
 };
+
+template<class Node_entry>
+Node<Node_entry>::Node()
+{
+    entry = NULL;
+    back = nullptr;
+    next = nullptr;
+}
+
+template<class Node_entry>
+Node<Node_entry>::Node(Node_entry item, Node<Node_entry> *node)
+{
+   node
+    entry = item;
+    next = node;
+}

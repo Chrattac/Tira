@@ -4,7 +4,7 @@
 
 
 
-typedef int Node_entry;
+typedef char Node_entry;
 
 struct Node {
 //  data members
